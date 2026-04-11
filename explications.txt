@@ -1,0 +1,35 @@
+todo-fullstack-project/
+├── docker-compose.yml          # Orchestration (App + DB + Redis)
+├── README.md                   # Documentation principale
+├── architecture-details.pdf    # Le document détaillé pour les recruteurs
+│
+├── todo-backend/               # Dossier du microservice Spring Boot 3 / Java 21
+│   ├── pom.xml                 # Dépendances (Spring, JWT, Redis, Cucumber)
+│   ├── Dockerfile              # Build multi-stage (Maven + JRE 21)
+│   └── src/
+│       ├── main/java/com/example/todo/
+│       │   ├── domain/         # --- LE COEUR (0 dépendance framework) ---
+│       │   │   ├── model/      # Entités (Task.java en record)
+│       │   │   ├── ports/      # Interfaces (TaskRepository.java)
+│       │   │   └── service/    # Logique métier (TaskService.java)
+│       │   │
+│       │   ├── infrastructure/ # --- L'ADAPTATION (Détails techniques) ---
+│       │   │   ├── adapters/   # Persistence (PostgresTaskRepository, JpaTaskRepository)
+│       │   │   ├── config/     # Configuration (RedisConfig, DomainConfig pour les Beans)
+│       │   │   └── security/   # Sécurité (JwtService, JwtFilter, SecurityConfig)
+│       │   │
+│       │   └── application/    # --- L'ENTRÉE (Points d'accès) ---
+│       │       └── web/        # Contrôleurs REST (TaskController, AuthController)
+│       │
+│       └── test/               # --- LES TESTS ---
+│           ├── java/           # Tests TDD (JUnit 5 / Mockito)
+│           └── resources/      # Tests BDD (Fichiers .feature de Cucumber)
+│
+└── todo-frontend/              # Dossier de l'application React
+    ├── package.json
+    ├── Dockerfile              # Build (Node) + Serveur (Nginx)
+    ├── tailwind.config.js      # Pour un design moderne
+    └── src/
+        ├── api/                # Appels Axios (gestion des tokens)
+        ├── components/         # Composants réutilisables (TaskCard, Navbar)
+        └── App.js              # Logique d'authentification et routage

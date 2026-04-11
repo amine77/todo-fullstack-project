@@ -1,0 +1,40 @@
+services:
+  # Base de données
+  postgres:
+    image: postgres:16-alpine
+    container_name: todo-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: todolist
+    ports:
+      - "5432:5432"
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    container_name: todo-cache
+    ports:
+      - "6379:6379"
+
+  # Backend Spring Boot
+  backend:
+    build: ./todo-backend
+    container_name: todo-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/todolist
+      - SPRING_DATA_REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+
+  # Frontend React
+  frontend:
+    build: ./todo-frontend
+    container_name: todo-ui
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
