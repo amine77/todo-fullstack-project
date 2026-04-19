@@ -43,3 +43,46 @@ body {
 .btn-primary:hover {
   background: linear-gradient(90deg, #3a538c 0%, #111d33 100%);
 }
+
+/* ── Barre de recherche ────────────────────────────────────────────────────── */
+/* Icône de loupe positionnée à l'intérieur de l'input */
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none; /* L'icône ne capture pas les clics */
+}
+
+/* Légère opacité pendant la transition useTransition pour signaler le chargement */
+.searching {
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+/* ── Panneau de statistiques (Stats.jsx) ──────────────────────────────────── */
+/* Fond légèrement coloré pour distinguer visuellement la section stats */
+.stats-panel {
+  background: linear-gradient(135deg, #f0f4ff 0%, #f8f9fa 100%);
+  border: 1px solid #e2e8f0;
+  animation: fadeIn 0.3s ease; /* Entrée douce lors du chargement différé */
+}
+
+/* Chaque carte de statistique individuelle */
+.stat-box {
+  background: white;
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Animation d'apparition — utilisée par le panneau Stats chargé en lazy */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
