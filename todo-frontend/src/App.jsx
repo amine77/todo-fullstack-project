@@ -21,6 +21,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import Login from './components/Login';
@@ -37,31 +38,62 @@ const TodoList = lazy(() => import('./components/TodoList'));
  * Si on appelait useAuth() directement dans App, le Provider n'aurait
  * pas encore été monté — cela provoquerait une valeur null.
  */
-function AppContent() {
-  const { token } = useAuth(); // Lit l'état d'authentification depuis le contexte
-
+/**
+ * ProtectedRoute : Composant wrapper pour sécuriser l'accès à certaines routes.
+ * Si l'utilisateur n'est pas connecté, il est redirigé vers la page de connexion.
+ */
+function ProtectedRoute({ children }) {
+  const { token } = useAuth();
   if (!token) {
-    // Utilisateur non connecté → affichage du formulaire de connexion
-    return <Login />;
+    return <Navigate to="/login" replace />;
   }
+  return children;
+}
 
-  // Utilisateur connecté :
-  //  - TaskProvider est monté (accès aux tâches disponible pour tous les enfants)
-  //  - TodoList est chargée de façon différée (React.lazy)
-  //  - Suspense affiche un fallback pendant le téléchargement du chunk JS
+/**
+ * PublicRoute : Redirige vers l'accueil si l'utilisateur est déjà connecté.
+ */
+function PublicRoute({ children }) {
+  const { token } = useAuth();
+  if (token) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
+function AppContent() {
   return (
-    <TaskProvider>
-      <Suspense fallback={
-        <div className="d-flex align-items-center justify-content-center min-vh-100">
-          <div className="text-center text-muted">
-            <div className="spinner-border text-primary mb-3" role="status"></div>
-            <p>Chargement de l'application…</p>
-          </div>
-        </div>
-      }>
-        <TodoList />
-      </Suspense>
-    </TaskProvider>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <TaskProvider>
+              <Suspense fallback={
+                <div className="d-flex align-items-center justify-content-center min-vh-100">
+                  <div className="text-center text-muted">
+                    <div className="spinner-border text-primary mb-3" role="status"></div>
+                    <p>Chargement de l'application…</p>
+                  </div>
+                </div>
+              }>
+                <TodoList />
+              </Suspense>
+            </TaskProvider>
+          </ProtectedRoute>
+        }
+      />
+      {/* Redirection par défaut pour les routes inconnues */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

@@ -13,7 +13,8 @@
 3. [useMemo & useTransition — Recherche fluide](#3-usememo--usetransition--recherche-fluide)
 4. [useCallback & React.memo — Éviter les rendus inutiles](#4-usecallback--reactmemo--éviter-les-rendus-inutiles)
 5. [React.lazy & Suspense — Chargement différé](#5-reactlazy--suspense--chargement-différé)
-6. [Arborescence des fichiers](#6-arborescence-des-fichiers)
+6. [React Router — Routage déclaratif et sécurisé](#6-react-router--routage-déclaratif-et-sécurisé)
+7. [Arborescence des fichiers](#7-arborescence-des-fichiers)
 
 ---
 
@@ -32,15 +33,15 @@ simultanément. Cela rendait le code difficile à lire, à tester et à faire é
 ### Après la refactorisation
 
 ```
-App.jsx                    ← Orchestrateur minimal (Provider + routage conditionnel)
+App.jsx                    ← Orchestrateur (AuthProvider + Routes)
 ├── context/
 │   ├── AuthContext.jsx    ← État d'authentification (token, login, logout)
 │   └── TaskContext.jsx    ← État des tâches + CRUD API
 └── components/
-    ├── Login.jsx          ← Vue de connexion (formulaire uniquement)
-    ├── TodoList.jsx       ← Vue principale (search, add, list)
-    ├── TaskItem.jsx       ← Élément unitaire de liste (mémoïsé)
-    └── Stats.jsx          ← Panneau statistiques (chargé en lazy)
+    ├── Login.jsx          ← Route `/login`
+    ├── TodoList.jsx       ← Route `/` (Dashboard, protégée)
+    ├── TaskItem.jsx       ← Élément unitaire de liste
+    └── Stats.jsx          ← Panneau statistiques (lazy)
 ```
 
 **Principe appliqué :** [Single Responsibility Principle](https://fr.wikipedia.org/wiki/Principe_de_responsabilit%C3%A9_unique) —
@@ -242,7 +243,53 @@ dans `dist/assets/`.
 
 ---
 
-## 6. Arborescence des fichiers
+## 6. React Router — Routage déclaratif et sécurisé
+
+### Le problème : routage manuel conditionnel
+
+Initialement, le changement de vue (Login ↔ Dashboard) était géré par un `if/else` simple dans `App.jsx`. Bien que fonctionnel, cela présente des limites :
+- L'URL ne change jamais (`localhost:5173/` pour tout).
+- On ne peut pas utiliser les boutons "Suivant" et "Précédent" du navigateur.
+- On ne peut pas partager un lien vers une page spécifique.
+
+### La solution : React Router v6
+
+Le projet utilise désormais `react-router-dom` pour gérer la navigation via des composants déclaratifs.
+
+#### Configuration globale (`main.jsx`)
+On enveloppe l'application dans `<BrowserRouter>` pour activer la gestion de l'historique HTML5.
+
+#### Définition des routes (`App.jsx`)
+```jsx
+<Routes>
+  <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+  <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+  <Route path="*" element={<Navigate to="/" replace />} />
+</Routes>
+```
+
+### Sécurisation des accès (Guards)
+
+Deux composants "wrapper" ont été créés pour sécuriser les routes :
+
+1. **`ProtectedRoute`** : 
+   - Vérifie si un `token` existe.
+   - Si **non** → redirige vers `/login` via `<Navigate to="/login" />`.
+   - Si **oui** → affiche le contenu (`children`).
+
+2. **`PublicRoute`** : 
+   - Empêche un utilisateur déjà connecté d'accéder à la page de login.
+   - Si un `token` existe → redirige vers `/`.
+
+### Navigation programmatique
+
+Le hook `useNavigate()` est utilisé pour changer de page après une action :
+- **Login** : `navigate('/')` après le succès de l'authentification.
+- **Logout** : `navigate('/login')` après la suppression du token.
+
+---
+
+## 7. Arborescence des fichiers
 
 ```
 todo-frontend/

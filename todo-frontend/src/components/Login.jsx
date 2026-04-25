@@ -9,6 +9,7 @@
  */
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
@@ -20,6 +21,7 @@ function Login() {
 
   // Récupération de la méthode login depuis le contexte d'authentification
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   /**
    * handleSubmit : intercepte la soumission du formulaire,
@@ -31,7 +33,9 @@ function Login() {
     setLoading(true);
     try {
       await login(username, password);
-      // En cas de succès, AuthContext met à jour `token` → App.jsx affiche TodoList
+      // En cas de succès, AuthContext met à jour `token`.
+      // On redirige explicitement vers l'accueil.
+      navigate('/');
     } catch {
       setError('Identifiants incorrects. Veuillez réessayer.');
     } finally {

@@ -35,6 +35,7 @@ import React, {
   Suspense,
   lazy,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../context/TaskContext';
 import { useAuth } from '../context/AuthContext';
 import TaskItem from './TaskItem';
@@ -50,6 +51,7 @@ function TodoList() {
   // ── Données et actions depuis les contextes ─────────────────────────────
   const { tasks, addTask, toggleTask, deleteTask } = useTasks();
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   // ── État local (scope limité à cette vue) ────────────────────────────────
   const [newTaskTitle, setNewTaskTitle] = useState('');
@@ -123,7 +125,10 @@ function TodoList() {
                 Ma Todo List
               </h2>
               <button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
                 className="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm"
               >
                 <i className="bi bi-box-arrow-right me-1"></i> Déconnexion
